@@ -22,7 +22,7 @@ func Run() {
 	serverHandler.Handle("/", http.FileServer(currentDir))
 
 	// Start server and log any failures
-	slog.Info("Starting server", "address", serverAddress)
+	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr))
 	err := srvr.ListenAndServe()
 	if err != nil {
 		slog.Error("Server Error", "error", err)
