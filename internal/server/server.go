@@ -19,6 +19,7 @@ func Run() {
 
 	// Register handlers
 	serverHandler.Handle("/", indexFileHandler())
+	serverHandler.Handle("/healthz", healthHandler{})
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr))
