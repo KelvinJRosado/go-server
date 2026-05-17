@@ -17,9 +17,8 @@ func Run() {
 		Addr:    serverAddress,
 	}
 
-	// Add file handler
-	currentDir := http.Dir("./internal/server/")
-	serverHandler.Handle("/", http.FileServer(currentDir))
+	// Register handlers
+	serverHandler.Handle("/", indexFileHandler())
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr))
