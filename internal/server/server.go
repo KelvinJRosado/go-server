@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"sync/atomic"
 )
 
 func Run() {
@@ -17,12 +18,19 @@ func Run() {
 		Addr:    serverAddress,
 	}
 
+	// Instantiate metric counter
+	appState := apiConfig{
+		fileserverHits: atomic.Int32{},
+	}
+
 	// Register handlers
-	serverHandler.Handle("/app/", indexFileHandler())
+	serverHandler.Handle("/app/", appState.middlewareMetricsInc(indexFileHandler()))
 	serverHandler.Handle("/healthz", healthHandler{})
+	serverHandler.Handle("/metrics", &appState)
+	serverHandler.Handle("/reset", appState.resetMetric())
 
 	// Start server and log any failures
-	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr))
+	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")
 	err := srvr.ListenAndServe()
 	if err != nil {
 		slog.Error("Server Error", "error", err)
