@@ -24,10 +24,10 @@ func Run() {
 	}
 
 	// Register handlers
-	serverHandler.Handle("/app/", appState.middlewareMetricsInc(indexFileHandler()))
-	serverHandler.Handle("/healthz", healthHandler{})
-	serverHandler.Handle("/metrics", &appState)
-	serverHandler.Handle("/reset", appState.resetMetric())
+	serverHandler.Handle("/app/", appState.middlewareMetricsInc(appState.indexFileHandler()))
+	serverHandler.Handle("/healthz", appState.healthHandler())
+	serverHandler.Handle("/metrics", appState.metricsHandler())
+	serverHandler.Handle("/reset", appState.resetMetricsHandler())
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")
