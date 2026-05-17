@@ -19,15 +19,15 @@ func Run() {
 	}
 
 	// Instantiate metric counter
-	appState := apiConfig{
+	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
 	}
 
 	// Register handlers
-	serverHandler.Handle("/app/", appState.middlewareMetricsInc(appState.indexFileHandler()))
-	serverHandler.Handle("/healthz", appState.healthHandler())
-	serverHandler.Handle("/metrics", appState.metricsHandler())
-	serverHandler.Handle("/reset", appState.resetMetricsHandler())
+	serverHandler.Handle("/app/", apiCfg.middlewareMetricsInc(apiCfg.indexFileHandler()))
+	serverHandler.Handle("/healthz", apiCfg.healthHandler())
+	serverHandler.Handle("/metrics", apiCfg.metricsHandler())
+	serverHandler.Handle("/reset", apiCfg.resetMetricsHandler())
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")
