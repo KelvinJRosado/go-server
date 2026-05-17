@@ -18,7 +18,7 @@ func Run() {
 	}
 
 	// Register handlers
-	serverHandler.Handle("/", indexFileHandler())
+	serverHandler.Handle("/app/", indexFileHandler())
 	serverHandler.Handle("/healthz", healthHandler{})
 
 	// Start server and log any failures
