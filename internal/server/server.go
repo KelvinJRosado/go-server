@@ -12,7 +12,7 @@ func Run() {
 	serverAddress := ":8080"
 
 	// Create server
-	server := &http.Server{
+	srvr := &http.Server{
 		Handler: serverHandler,
 		Addr:    serverAddress,
 	}
@@ -23,7 +23,7 @@ func Run() {
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", serverAddress)
-	err := server.ListenAndServe()
+	err := srvr.ListenAndServe()
 	if err != nil {
 		slog.Error("Server Error", "error", err)
 		os.Exit(1)
