@@ -19,15 +19,17 @@ func Run() {
 
 	// Create server
 	srvr := &http.Server{
-		Handler: apiCfg.middlewareRequestLogging(serverHandler),
+		Handler: apiCfg.middlewareRequestLogging(serverHandler), // Apply request logging middleware to all handlers
 		Addr:    serverAddress,
 	}
 
 	// Register handlers
 	serverHandler.Handle("/app/", apiCfg.middlewareMetricsInc(apiCfg.indexFileHandler()))
-	serverHandler.Handle("GET /healthz", apiCfg.healthHandler())
-	serverHandler.Handle("GET /metrics", apiCfg.metricsHandler())
-	serverHandler.Handle("POST /reset", apiCfg.resetMetricsHandler())
+
+	serverHandler.Handle("GET /admin/metrics", apiCfg.metricsHandler())
+
+	serverHandler.Handle("GET /api/healthz", apiCfg.healthHandler())
+	serverHandler.Handle("POST /api/reset", apiCfg.resetMetricsHandler())
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")
