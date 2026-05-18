@@ -12,22 +12,22 @@ func Run() {
 	serverHandler := http.NewServeMux()
 	serverAddress := ":8080"
 
-	// Create server
-	srvr := &http.Server{
-		Handler: serverHandler,
-		Addr:    serverAddress,
-	}
-
 	// Instantiate metric counter
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
 	}
 
+	// Create server
+	srvr := &http.Server{
+		Handler: apiCfg.middlewareRequestLogging(serverHandler),
+		Addr:    serverAddress,
+	}
+
 	// Register handlers
 	serverHandler.Handle("/app/", apiCfg.middlewareMetricsInc(apiCfg.indexFileHandler()))
-	serverHandler.Handle("/healthz", apiCfg.healthHandler())
-	serverHandler.Handle("/metrics", apiCfg.metricsHandler())
-	serverHandler.Handle("/reset", apiCfg.resetMetricsHandler())
+	serverHandler.Handle("GET /healthz", apiCfg.healthHandler())
+	serverHandler.Handle("GET /metrics", apiCfg.metricsHandler())
+	serverHandler.Handle("POST /reset", apiCfg.resetMetricsHandler())
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")
