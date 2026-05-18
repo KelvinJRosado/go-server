@@ -2,8 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
+	"unicode/utf8"
 )
 
 func (ac *apiConfig) chirpValidateHandler() http.Handler {
@@ -13,24 +15,41 @@ func (ac *apiConfig) chirpValidateHandler() http.Handler {
 			Body string `json:"body"`
 		}
 
-		// Extract input into struct
-		decoder := json.NewDecoder(req.Body)
-		params := input{}
-		err := decoder.Decode(&params)
+		// Get body into string
+		bodyData, err := io.ReadAll(req.Body)
 		if err != nil {
-			// If can't decode response, return 500
-			slog.Error("Error decoding parameters", "error", err)
-			res.WriteHeader(500)
+			slog.Error("Error reading request body", "error", err)
+			respondWithError(res, http.StatusBadRequest, "Invalid request body")
 			return
 		}
 
-		// TODO: Implement
+		// Extract input into struct
+		decoder := json.NewDecoder(req.Body)
+		params := input{}
+		err = decoder.Decode(&params)
+		if err != nil {
+			// If can't decode response, return 500
+			slog.Error("Error decoding parameters", "error", err, "body", string(bodyData))
+			respondWithError(res, http.StatusBadRequest, "Invalid request body")
+			return
+		}
 
-		// Update response header
-		res.Header().Add("Content-Type", "text/plain; charset=utf-8")
+		// Check length of string (runes, not bytes)
+		bodyLength := utf8.RuneCountInString(params.Body)
 
-		// Update response body and status
-		res.WriteHeader(http.StatusOK)
-		res.Write([]byte("OK"))
+		// Return 400 error if string too long
+		if bodyLength > 140 {
+			respondWithError(res, http.StatusBadRequest, "Chirp is too long")
+			return
+		}
+
+		// If string is valid, send success
+		type success struct {
+			Valid bool `json:"valid"`
+		}
+		suc := success{
+			Valid: true,
+		}
+		respondWithJSON(res, http.StatusOK, suc)
 	})
 }
