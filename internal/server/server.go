@@ -27,9 +27,9 @@ func Run() {
 	serverHandler.Handle("/app/", apiCfg.middlewareMetricsInc(apiCfg.indexFileHandler()))
 
 	serverHandler.Handle("GET /admin/metrics", apiCfg.metricsHandler())
+	serverHandler.Handle("POST /admin/reset", apiCfg.resetMetricsHandler())
 
 	serverHandler.Handle("GET /api/healthz", apiCfg.healthHandler())
-	serverHandler.Handle("POST /api/reset", apiCfg.resetMetricsHandler())
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")
