@@ -2,14 +2,11 @@ package server
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 )
 
 func (ac *apiConfig) metricsHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		slog.Info("Received metrics request")
-
 		// Update response header
 		res.Header().Add("Content-Type", "text/plain; charset=utf-8")
 
@@ -21,9 +18,6 @@ func (ac *apiConfig) metricsHandler() http.Handler {
 
 func (ac *apiConfig) resetMetricsHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		// Log request info
-		slog.Info("Received metric reset request", "preResetValue", ac.fileserverHits.Load())
-
 		// Reset counter back to 0
 		ac.fileserverHits.Store(0)
 
