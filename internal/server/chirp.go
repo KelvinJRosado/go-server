@@ -24,9 +24,8 @@ func (ac *apiConfig) chirpValidateHandler() http.Handler {
 		}
 
 		// Extract input into struct
-		decoder := json.NewDecoder(req.Body)
 		params := input{}
-		err = decoder.Decode(&params)
+		err = json.Unmarshal(bodyData, &params)
 		if err != nil {
 			// If can't decode response, return 500
 			slog.Error("Error decoding parameters", "error", err, "body", string(bodyData))
