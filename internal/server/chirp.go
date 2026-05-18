@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"unicode/utf8"
 )
 
@@ -34,7 +35,8 @@ func (ac *apiConfig) chirpValidateHandler() http.Handler {
 		}
 
 		// Check length of string (runes, not bytes)
-		bodyLength := utf8.RuneCountInString(params.Body)
+		body := params.Body
+		bodyLength := utf8.RuneCountInString(body)
 
 		// Return 400 error if string too long
 		if bodyLength > 140 {
@@ -42,12 +44,22 @@ func (ac *apiConfig) chirpValidateHandler() http.Handler {
 			return
 		}
 
+		// Filter
+		blockList := []string{"kerfuffle", "sharbert", "fornax"}
+
+		for _, word := range blockList {
+			// Build case-insensitve regex search
+			re := regexp.MustCompile(`(?i)(^|\s)(` + word + `)(\s|$)`)
+
+			body = re.ReplaceAllString(body, `${1}****${3}`)
+		}
+
 		// If string is valid, send success
 		type success struct {
-			Valid bool `json:"valid"`
+			CleanedBody string `json:"cleaned_body"`
 		}
 		suc := success{
-			Valid: true,
+			CleanedBody: body,
 		}
 		respondWithJSON(res, http.StatusOK, suc)
 	})
