@@ -27,3 +27,5 @@ go-server
 
 *.log
 log/
+
+.env

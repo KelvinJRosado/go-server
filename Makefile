@@ -1,6 +1,9 @@
 BINARY := go-server
+
+-include .env
+
 GOOSE_DRIVER := postgres
-GOOSE_DBSTRING := postgres://kelvin:@localhost:5432/chirpy
+GOOSE_DBSTRING := $(DB_URL)
 GOOSE_MIGRATION_DIR := sql/schema
 
 .DEFAULT_GOAL := help
