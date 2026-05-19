@@ -5,7 +5,7 @@ GOOSE_MIGRATION_DIR := sql/schema
 
 .DEFAULT_GOAL := help
 
-.PHONY: help run build test test-race cover fmt fmt-check vet vet-shadow tidy tidy-check ci clean migrate-up migrate-down migrate-status
+.PHONY: help run build test test-race cover fmt fmt-check vet vet-shadow tidy tidy-check ci clean migrate-up migrate-down migrate-status sqlc
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -63,6 +63,9 @@ migrate-down: ## Roll back the most recent database migration
 
 migrate-status: ## Show database migration status
 	goose -dir $(GOOSE_MIGRATION_DIR) $(GOOSE_DRIVER) $(GOOSE_DBSTRING) status
+
+sqlc: ## Generate Go code from SQL queries
+	sqlc generate
 
 ci: fmt-check vet vet-shadow cover build tidy-check ## Run the same checks CI runs
 
