@@ -1,8 +1,11 @@
 BINARY := go-server
+GOOSE_DRIVER := postgres
+GOOSE_DBSTRING := postgres://kelvin:@localhost:5432/chirpy
+GOOSE_MIGRATION_DIR := sql/schema
 
 .DEFAULT_GOAL := help
 
-.PHONY: help run build test test-race cover fmt fmt-check vet vet-shadow tidy tidy-check ci clean
+.PHONY: help run build test test-race cover fmt fmt-check vet vet-shadow tidy tidy-check ci clean migrate-up migrate-down migrate-status
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -51,6 +54,15 @@ tidy-check: ## Fail if go.mod/go.sum would change (matches CI)
 		echo "go.mod or go.sum changed. Run 'make tidy' and commit the result."; \
 		exit 1; \
 	fi
+
+migrate-up: ## Run all pending database migrations
+	goose -dir $(GOOSE_MIGRATION_DIR) $(GOOSE_DRIVER) $(GOOSE_DBSTRING) up
+
+migrate-down: ## Roll back the most recent database migration
+	goose -dir $(GOOSE_MIGRATION_DIR) $(GOOSE_DRIVER) $(GOOSE_DBSTRING) down
+
+migrate-status: ## Show database migration status
+	goose -dir $(GOOSE_MIGRATION_DIR) $(GOOSE_DRIVER) $(GOOSE_DBSTRING) status
 
 ci: fmt-check vet vet-shadow cover build tidy-check ## Run the same checks CI runs
 
