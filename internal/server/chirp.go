@@ -48,9 +48,10 @@ func (ac *apiConfig) chirpValidateHandler() http.Handler {
 		blockList := []string{"kerfuffle", "sharbert", "fornax"}
 
 		for _, word := range blockList {
-			// Build case-insensitve regex search
+			// Build case-insensitve regex search, allowing for special characters
 			re := regexp.MustCompile(`(?i)(^|\s)(` + word + `)(\s|$)`)
 
+			// Filter as needed
 			body = re.ReplaceAllString(body, `${1}****${3}`)
 		}
 
