@@ -4,10 +4,13 @@ import (
 	"log/slog"
 	"net/http"
 	"sync/atomic"
+
+	"github.com/KelvinJRosado/go-server/internal/database"
 )
 
 type apiConfig struct {
-	fileserverHits atomic.Int32
+	fileserverHits  atomic.Int32
+	databaseQueries *database.Queries
 }
 
 func (ac *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {

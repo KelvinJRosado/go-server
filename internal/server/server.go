@@ -1,22 +1,36 @@
 package server
 
 import (
+	"database/sql"
 	"log/slog"
 	"net/http"
 	"os"
 	"sync/atomic"
 
+	"github.com/KelvinJRosado/go-server/internal/database"
 	_ "github.com/lib/pq"
 )
 
 func Run() {
+	// Get DB Connection
+	dbURL := os.Getenv("DB_URL")
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		slog.Error("Failed to connect to DB", "error", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	dbQueries := database.New(db)
+
 	// Create inputs for server
 	serverHandler := http.NewServeMux()
 	serverAddress := ":8080"
 
 	// Instantiate metric counter
 	apiCfg := apiConfig{
-		fileserverHits: atomic.Int32{},
+		fileserverHits:  atomic.Int32{},
+		databaseQueries: dbQueries,
 	}
 
 	// Create server
@@ -36,7 +50,7 @@ func Run() {
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")
-	err := srvr.ListenAndServe()
+	err = srvr.ListenAndServe()
 	if err != nil {
 		slog.Error("Server Error", "error", err)
 		os.Exit(1)
