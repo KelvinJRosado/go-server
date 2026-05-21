@@ -40,5 +40,4 @@ func respondWithInternalError(res http.ResponseWriter) {
 
 	// Send canned message
 	respondWithError(res, http.StatusInternalServerError, "Something went wrong")
-
 }
