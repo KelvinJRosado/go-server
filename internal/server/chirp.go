@@ -1,9 +1,6 @@
 package server
 
 import (
-	"encoding/json"
-	"io"
-	"log/slog"
 	"net/http"
 	"regexp"
 	"unicode/utf8"
@@ -16,23 +13,7 @@ func (ac *apiConfig) chirpValidateHandler() http.Handler {
 			Body string `json:"body"`
 		}
 
-		// Get body into string
-		bodyData, err := io.ReadAll(req.Body)
-		if err != nil {
-			slog.Error("Error reading request body", "error", err)
-			respondWithError(res, http.StatusBadRequest, "Invalid request body")
-			return
-		}
-
-		// Extract input into struct
-		params := input{}
-		err = json.Unmarshal(bodyData, &params)
-		if err != nil {
-			// If can't decode response, return 500
-			slog.Error("Error decoding parameters", "error", err, "body", string(bodyData))
-			respondWithError(res, http.StatusBadRequest, "Invalid request body")
-			return
-		}
+		params := getInputStruct[input](res, req)
 
 		// Check length of string (runes, not bytes)
 		body := params.Body
