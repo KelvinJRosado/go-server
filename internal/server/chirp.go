@@ -13,7 +13,12 @@ func (ac *apiConfig) chirpValidateHandler() http.Handler {
 			Body string `json:"body"`
 		}
 
-		params := getInputStruct[input](res, req)
+		// Parse input
+		params, ok := getInputStruct[input](res, req)
+		if !ok {
+			// Util handles writing error response, so we can just return
+			return
+		}
 
 		// Check length of string (runes, not bytes)
 		body := params.Body

@@ -43,7 +43,7 @@ func respondWithInternalError(res http.ResponseWriter) {
 	respondWithError(res, http.StatusInternalServerError, "Something went wrong")
 }
 
-func getInputStruct[T any](res http.ResponseWriter, req *http.Request) T {
+func getInputStruct[T any](res http.ResponseWriter, req *http.Request) (T, bool) {
 
 	// Init response
 	var params T
@@ -53,7 +53,7 @@ func getInputStruct[T any](res http.ResponseWriter, req *http.Request) T {
 	if err != nil {
 		slog.Error("Error reading request body", "error", err)
 		respondWithError(res, http.StatusBadRequest, "Invalid request body")
-		return params
+		return params, false
 	}
 
 	// Extract input into struct
@@ -62,8 +62,8 @@ func getInputStruct[T any](res http.ResponseWriter, req *http.Request) T {
 		// If can't decode response, return 500
 		slog.Error("Error decoding parameters", "error", err, "body", string(bodyData))
 		respondWithError(res, http.StatusBadRequest, "Invalid request body")
-		return params
+		return params, false
 	}
 
-	return params
+	return params, true
 }
