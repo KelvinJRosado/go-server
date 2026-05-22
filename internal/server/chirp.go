@@ -1,16 +1,23 @@
 package server
 
 import (
+	"log/slog"
 	"net/http"
 	"regexp"
 	"unicode/utf8"
+
+	"github.com/KelvinJRosado/go-server/internal/database"
+	"github.com/google/uuid"
 )
+
+type Uuid = uuid.UUID
 
 func (ac *apiConfig) createChirpHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		// Get input
 		type input struct {
-			Body string `json:"body"`
+			Body   string `json:"body"`
+			UserId Uuid   `json:"user_id"`
 		}
 
 		// Parse input
@@ -41,13 +48,18 @@ func (ac *apiConfig) createChirpHandler() http.Handler {
 			body = re.ReplaceAllString(body, `${1}****${3}`)
 		}
 
-		// If string is valid, send success
-		type success struct {
-			CleanedBody string `json:"cleaned_body"`
+		// Save chirp into DB
+		dbArgs := database.CreateChirpParams{
+			Body:   body,
+			UserID: params.UserId,
 		}
-		suc := success{
-			CleanedBody: body,
+		ch, err := ac.databaseQueries.CreateChirp(req.Context(), dbArgs)
+		if err != nil {
+			slog.Error("Could not create chirp", "error", err)
+			respondWithError(res, http.StatusBadRequest, "Could not create chirp")
+			return
 		}
-		respondWithJSON(res, http.StatusOK, suc)
+
+		respondWithJSON(res, http.StatusCreated, ch)
 	})
 }
