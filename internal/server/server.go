@@ -49,7 +49,7 @@ func Run() {
 	serverHandler.Handle("POST /api/users", apiCfg.createUserHandler())
 
 	serverHandler.Handle("GET /api/healthz", apiCfg.healthHandler())
-	serverHandler.Handle("POST /api/validate_chirp", apiCfg.chirpValidateHandler())
+	serverHandler.Handle("POST /api/chirps", apiCfg.createChirpHandler())
 
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")

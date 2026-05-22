@@ -6,7 +6,7 @@ import (
 	"unicode/utf8"
 )
 
-func (ac *apiConfig) chirpValidateHandler() http.Handler {
+func (ac *apiConfig) createChirpHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		// Get input
 		type input struct {
