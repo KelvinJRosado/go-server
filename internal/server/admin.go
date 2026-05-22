@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 )
 
@@ -25,8 +26,23 @@ func (ac *apiConfig) metricsHandler() http.Handler {
 
 func (ac *apiConfig) adminResetHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		// Block if not dev
+		if ac.platform != "dev" {
+			respondWithError(res, http.StatusForbidden, "Reset only available in dev")
+			return
+		}
+
 		// Reset counter back to 0
 		ac.fileserverHits.Store(0)
+
+		// Delete all users
+		err := ac.databaseQueries.DeleteAllUsers(req.Context())
+		if err != nil {
+			slog.Error("failed to delete users", "error", err)
+			respondWithInternalError(res)
+			return
+		}
 
 		// Update response header
 		res.Header().Add("Content-Type", "text/plain; charset=utf-8")
