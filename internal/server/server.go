@@ -45,6 +45,8 @@ func Run() {
 	serverHandler.Handle("GET /admin/metrics", apiCfg.metricsHandler())
 	serverHandler.Handle("POST /admin/reset", apiCfg.resetMetricsHandler())
 
+	serverHandler.Handle("POST /api/users", apiCfg.createUserHandler())
+
 	serverHandler.Handle("GET /api/healthz", apiCfg.healthHandler())
 	serverHandler.Handle("POST /api/validate_chirp", apiCfg.chirpValidateHandler())
 
