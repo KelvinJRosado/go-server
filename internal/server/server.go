@@ -31,6 +31,7 @@ func Run() {
 	apiCfg := apiConfig{
 		fileserverHits:  atomic.Int32{},
 		databaseQueries: dbQueries,
+		platform:        os.Getenv("PLATFORM"),
 	}
 
 	// Create server
@@ -43,7 +44,7 @@ func Run() {
 	serverHandler.Handle("/app/", apiCfg.middlewareMetricsInc(apiCfg.indexFileHandler()))
 
 	serverHandler.Handle("GET /admin/metrics", apiCfg.metricsHandler())
-	serverHandler.Handle("POST /admin/reset", apiCfg.resetMetricsHandler())
+	serverHandler.Handle("POST /admin/reset", apiCfg.adminResetHandler())
 
 	serverHandler.Handle("POST /api/users", apiCfg.createUserHandler())
 

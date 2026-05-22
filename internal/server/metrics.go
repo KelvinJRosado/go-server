@@ -23,7 +23,7 @@ func (ac *apiConfig) metricsHandler() http.Handler {
 	})
 }
 
-func (ac *apiConfig) resetMetricsHandler() http.Handler {
+func (ac *apiConfig) adminResetHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		// Reset counter back to 0
 		ac.fileserverHits.Store(0)

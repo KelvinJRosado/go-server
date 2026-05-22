@@ -11,6 +11,7 @@ import (
 type apiConfig struct {
 	fileserverHits  atomic.Int32
 	databaseQueries *database.Queries
+	platform        string
 }
 
 func (ac *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
