@@ -3,9 +3,6 @@ package server
 import (
 	"log/slog"
 	"net/http"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 func (ac *apiConfig) createUserHandler() http.Handler {
@@ -29,19 +26,6 @@ func (ac *apiConfig) createUserHandler() http.Handler {
 			return
 		}
 
-		type output struct {
-			ID        uuid.UUID `json:"id"`
-			CreatedAt time.Time `json:"created_at"`
-			UpdatedAt time.Time `json:"updated_at"`
-			Email     string    `json:"email"`
-		}
-		out := output{
-			ID:        user.ID,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-			Email:     user.Email,
-		}
-
-		respondWithJSON(res, http.StatusCreated, out)
+		respondWithJSON(res, http.StatusCreated, user)
 	})
 }
