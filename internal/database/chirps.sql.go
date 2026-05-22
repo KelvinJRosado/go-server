@@ -22,7 +22,7 @@ RETURNING
 
 type CreateChirpParams struct {
 	Body   string
-	UserID uuid.NullUUID
+	UserID uuid.UUID
 }
 
 func (q *Queries) CreateChirp(ctx context.Context, arg CreateChirpParams) (Chirp, error) {
