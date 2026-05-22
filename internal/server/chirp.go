@@ -61,3 +61,18 @@ func (ac *apiConfig) createChirpHandler() http.Handler {
 		respondWithJSON(res, http.StatusCreated, ch)
 	})
 }
+
+func (ac *apiConfig) getChirpsHandler() http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		// Get chirps from DB
+		ch, err := ac.databaseQueries.GetAllChirps(req.Context())
+		if err != nil {
+			slog.Error("Could not get chirps", "error", err)
+			respondWithInternalError(res)
+			return
+		}
+
+		respondWithJSON(res, http.StatusOK, ch)
+	})
+}
