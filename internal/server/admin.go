@@ -33,9 +33,6 @@ func (ac *apiConfig) adminResetHandler() http.Handler {
 			return
 		}
 
-		// Reset counter back to 0
-		ac.fileserverHits.Store(0)
-
 		// Delete all users
 		err := ac.databaseQueries.DeleteAllUsers(req.Context())
 		if err != nil {
@@ -43,6 +40,9 @@ func (ac *apiConfig) adminResetHandler() http.Handler {
 			respondWithInternalError(res)
 			return
 		}
+
+		// Reset counter back to 0
+		ac.fileserverHits.Store(0)
 
 		// Update response header
 		res.Header().Add("Content-Type", "text/plain; charset=utf-8")
