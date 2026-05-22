@@ -10,14 +10,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type Uuid = uuid.UUID
-
 func (ac *apiConfig) createChirpHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		// Get input
 		type input struct {
-			Body   string `json:"body"`
-			UserId Uuid   `json:"user_id"`
+			Body   string    `json:"body"`
+			UserId uuid.UUID `json:"user_id"`
 		}
 
 		// Parse input
