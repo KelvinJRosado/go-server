@@ -81,8 +81,9 @@ func (ac *apiConfig) getChirpByIdHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 
 		// Get ID from path
-		chirpId, err := uuid.FromBytes([]byte(req.PathValue("id")))
+		chirpId, err := uuid.Parse(req.PathValue("id"))
 		if err != nil {
+			slog.Error("Invalid chirp ID", "error", err)
 			respondWithError(res, http.StatusBadRequest, "Invalid chirp ID")
 			return
 		}
