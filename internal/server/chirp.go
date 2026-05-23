@@ -76,3 +76,25 @@ func (ac *apiConfig) getChirpsHandler() http.Handler {
 		respondWithJSON(res, http.StatusOK, ch)
 	})
 }
+
+func (ac *apiConfig) getChirpByIdHandler() http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		// Get ID from path
+		chirpId, err := uuid.FromBytes([]byte(req.PathValue("id")))
+		if err != nil {
+			respondWithError(res, http.StatusBadRequest, "Invalid chirp ID")
+			return
+		}
+
+		// Get chirp by ID
+		ch, err := ac.databaseQueries.GetChirpById(req.Context(), chirpId)
+		if err != nil {
+			slog.Error("Could not get chirps", "error", err)
+			respondWithError(res, http.StatusNotFound, "Chirp with given ID not found")
+			return
+		}
+
+		respondWithJSON(res, http.StatusOK, ch)
+	})
+}
