@@ -3,9 +3,11 @@ package server
 import (
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/KelvinJRosado/go-server/internal/auth"
 	"github.com/KelvinJRosado/go-server/internal/database"
+	"github.com/google/uuid"
 )
 
 func (ac *apiConfig) createUserHandler() http.Handler {
@@ -44,5 +46,59 @@ func (ac *apiConfig) createUserHandler() http.Handler {
 		}
 
 		respondWithJSON(res, http.StatusCreated, user)
+	})
+}
+
+func (ac *apiConfig) loginHandler() http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		// Get input
+		type input struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+
+		params, ok := getInputStruct[input](res, req)
+		if !ok {
+			// Util handles writing error response, so we can just return
+			return
+		}
+
+		// Pull user data from DB
+		user, err := ac.databaseQueries.GetUserByEmail(req.Context(), params.Email)
+		if err != nil {
+			slog.Error("failed to get user by email", "error", err)
+			respondWithInternalError(res)
+			return
+		}
+
+		// Check password
+		pwMatch, err := auth.CheckPasswordHash(params.Password, user.HashedPassword)
+		if err != nil {
+			slog.Error("failed to check password hash", "error", err)
+			respondWithInternalError(res)
+			return
+		}
+		if !pwMatch {
+			respondWithJSON(res, http.StatusUnauthorized, nil)
+			return
+		}
+
+		type cleanedUser struct {
+			ID        uuid.UUID `json:"id"`
+			CreatedAt time.Time `json:"created_at"`
+			UpdatedAt time.Time `json:"updated_at"`
+			Email     string    `json:"email"`
+		}
+
+		cleaned := cleanedUser{
+			ID:        user.ID,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			Email:     user.Email,
+		}
+
+		// Password matches, return cleaned user
+		respondWithJSON(res, http.StatusOK, cleaned)
 	})
 }

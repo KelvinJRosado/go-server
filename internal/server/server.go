@@ -47,6 +47,7 @@ func Run() {
 	serverHandler.Handle("POST /admin/reset", apiCfg.adminResetHandler())
 
 	serverHandler.Handle("POST /api/users", apiCfg.createUserHandler())
+	serverHandler.Handle("POST /api/login", apiCfg.loginHandler())
 
 	serverHandler.Handle("GET /api/healthz", apiCfg.healthHandler())
 
