@@ -84,14 +84,12 @@ func (ac *apiConfig) loginHandler() http.Handler {
 			return
 		}
 
-		type cleanedUser struct {
+		cleanedUser := struct {
 			ID        uuid.UUID `json:"id"`
 			CreatedAt time.Time `json:"created_at"`
 			UpdatedAt time.Time `json:"updated_at"`
 			Email     string    `json:"email"`
-		}
-
-		cleaned := cleanedUser{
+		}{
 			ID:        user.ID,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
@@ -99,6 +97,6 @@ func (ac *apiConfig) loginHandler() http.Handler {
 		}
 
 		// Password matches, return cleaned user
-		respondWithJSON(res, http.StatusOK, cleaned)
+		respondWithJSON(res, http.StatusOK, cleanedUser)
 	})
 }

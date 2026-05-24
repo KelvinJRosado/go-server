@@ -26,15 +26,14 @@ func respondWithJSON(res http.ResponseWriter, code int, payload any) {
 
 func respondWithError(res http.ResponseWriter, code int, msg string) {
 	// Build response JSON
-	type errorMessage struct {
+	errorMessage := struct {
 		Error string `json:"error"`
-	}
-	em := errorMessage{
+	}{
 		Error: msg,
 	}
 
 	// Send response
-	respondWithJSON(res, code, em)
+	respondWithJSON(res, code, errorMessage)
 }
 
 func respondWithInternalError(res http.ResponseWriter) {
