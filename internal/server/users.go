@@ -80,7 +80,7 @@ func (ac *apiConfig) loginHandler() http.Handler {
 			return
 		}
 		if !pwMatch {
-			respondWithJSON(res, http.StatusUnauthorized, nil)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 
