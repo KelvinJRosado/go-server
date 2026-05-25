@@ -6,16 +6,31 @@ import (
 	"regexp"
 	"unicode/utf8"
 
+	"github.com/KelvinJRosado/go-server/internal/auth"
 	"github.com/KelvinJRosado/go-server/internal/database"
 	"github.com/google/uuid"
 )
 
 func (ac *apiConfig) createChirpHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		// Validate token
+		userToken, err := auth.GetBearerToken(req.Header)
+		if err != nil {
+			slog.Error("failed to get bearer token", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+		userId, err := auth.ValidateJWT(userToken, ac.jwtSecret)
+		if err != nil {
+			slog.Error("failed to validate jwt", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
 		// Get input
 		type input struct {
-			Body   string    `json:"body"`
-			UserId uuid.UUID `json:"user_id"`
+			Body string `json:"body"`
 		}
 
 		// Parse input
@@ -49,7 +64,7 @@ func (ac *apiConfig) createChirpHandler() http.Handler {
 		// Save chirp into DB
 		dbArgs := database.CreateChirpParams{
 			Body:   body,
-			UserID: params.UserId,
+			UserID: userId,
 		}
 		ch, err := ac.databaseQueries.CreateChirp(req.Context(), dbArgs)
 		if err != nil {

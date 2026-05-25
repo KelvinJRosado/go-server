@@ -54,8 +54,9 @@ func (ac *apiConfig) loginHandler() http.Handler {
 
 		// Get input
 		type input struct {
-			Email    string `json:"email"`
-			Password string `json:"password"`
+			Email            string `json:"email"`
+			Password         string `json:"password"`
+			ExpiresInSeconds int    `json:"expires_in_seconds"`
 		}
 
 		params, ok := getInputStruct[input](res, req)
@@ -63,6 +64,14 @@ func (ac *apiConfig) loginHandler() http.Handler {
 			// Util handles writing error response, so we can just return
 			return
 		}
+
+		// Validate expiration time, and convert to duration
+		// Should be defualted to 1 hour if not set
+		// Should be capped at 1 hour
+		if params.ExpiresInSeconds <= 0 || params.ExpiresInSeconds > 3600 {
+			params.ExpiresInSeconds = 3600
+		}
+		expiresIn := time.Duration(params.ExpiresInSeconds) * time.Second
 
 		// Pull user data from DB
 		user, err := ac.databaseQueries.GetUserByEmail(req.Context(), params.Email)
@@ -84,16 +93,26 @@ func (ac *apiConfig) loginHandler() http.Handler {
 			return
 		}
 
+		// Generate JWT
+		jwt, err := auth.MakeJWT(user.ID, ac.jwtSecret, expiresIn)
+		if err != nil {
+			slog.Error("failed to generate jwt", "error", err)
+			respondWithInternalError(res)
+			return
+		}
+
 		cleanedUser := struct {
 			ID        uuid.UUID `json:"id"`
 			CreatedAt time.Time `json:"created_at"`
 			UpdatedAt time.Time `json:"updated_at"`
 			Email     string    `json:"email"`
+			Token     string    `json:"token"`
 		}{
 			ID:        user.ID,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 			Email:     user.Email,
+			Token:     jwt,
 		}
 
 		// Password matches, return cleaned user
