@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"net/http"
 	"testing"
 	"time"
 
@@ -59,5 +60,40 @@ func TestExpiredToken(t *testing.T) {
 	_, err = ValidateJWT(token, tokenSecret)
 	if err == nil {
 		t.Errorf("Expected an error validating JWT, got nil")
+	}
+}
+
+func TestGetBearerToken(t *testing.T) {
+
+	headers := make(http.Header)
+
+	// Test happy path
+	headers.Set("Authorization", "beaRer foO")
+	resp, err := GetBearerToken(headers)
+	if err != nil {
+		t.Errorf("Got an unexpected error: %s", err)
+	}
+	if resp != "foO" {
+		t.Errorf("Expected 'foo', got '%s'", resp)
+	}
+
+	// Test empty header
+	headers.Set("Authorization", "")
+	resp, err = GetBearerToken(headers)
+	if err == nil {
+		t.Errorf("Didn't get the expected error")
+	}
+	if resp != "" {
+		t.Errorf("Expected empty string, got '%s'", resp)
+	}
+
+	// Test wrong format
+	headers.Set("Authorization", "foo")
+	resp, err = GetBearerToken(headers)
+	if err == nil {
+		t.Errorf("Didn't get the expected error")
+	}
+	if resp != "" {
+		t.Errorf("Expected empty string, got '%s'", resp)
 	}
 }
