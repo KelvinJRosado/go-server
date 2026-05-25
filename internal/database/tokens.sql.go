@@ -27,8 +27,8 @@ RETURNING
 `
 
 type CreateRefreshTokenParams struct {
-	Token  string        `json:"token"`
-	UserID uuid.NullUUID `json:"user_id"`
+	Token  string    `json:"token"`
+	UserID uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error) {
