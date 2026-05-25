@@ -23,6 +23,9 @@ func Run() {
 
 	dbQueries := database.New(db)
 
+	// Get JWT secret
+	jwtSecret := os.Getenv("JWT_SECRET")
+
 	// Create inputs for server
 	serverHandler := http.NewServeMux()
 	serverAddress := ":8080"
@@ -32,6 +35,7 @@ func Run() {
 		fileserverHits:  atomic.Int32{},
 		databaseQueries: dbQueries,
 		platform:        os.Getenv("PLATFORM"),
+		jwtSecret:       jwtSecret,
 	}
 
 	// Create server
