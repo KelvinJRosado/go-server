@@ -176,3 +176,24 @@ func (ac *apiConfig) refreshHandler() http.Handler {
 
 	})
 }
+
+func (ac *apiConfig) revokeHandler() http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		refreshToken, err := auth.GetBearerToken(req.Header)
+		if err != nil {
+			slog.Error("failed to get bearer token", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		err = ac.databaseQueries.RevokeToken(req.Context(), refreshToken)
+		if err != nil {
+			slog.Error("failed to revoke token", "error", err)
+			respondWithError(res, http.StatusInternalServerError, "Internal Server Error")
+			return
+		}
+
+		respondWithJSON(res, http.StatusNoContent, nil)
+
+	})
+}
