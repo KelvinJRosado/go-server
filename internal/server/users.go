@@ -197,3 +197,57 @@ func (ac *apiConfig) revokeHandler() http.Handler {
 
 	})
 }
+
+func (ac *apiConfig) updateUserHandler() http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		// Validate token
+		userToken, err := auth.GetBearerToken(req.Header)
+		if err != nil {
+			slog.Error("failed to get bearer token", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+		userId, err := auth.ValidateJWT(userToken, ac.jwtSecret)
+		if err != nil {
+			slog.Error("failed to validate jwt", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		// Get input
+		type input struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+
+		params, ok := getInputStruct[input](res, req)
+		if !ok {
+			// Util handles writing error response, so we can just return
+			return
+		}
+
+		// Get hashed password
+		hashedPw, err := auth.HashPassword(params.Password)
+		if err != nil {
+			slog.Error("failed to hash password", "error", err)
+			respondWithInternalError(res)
+			return
+		}
+
+		dbArgs := database.UpdateUserCredentialsParams{
+			Email:          params.Email,
+			HashedPassword: hashedPw,
+			ID:             userId,
+		}
+
+		user, err := ac.databaseQueries.UpdateUserCredentials(req.Context(), dbArgs)
+		if err != nil {
+			slog.Error("failed to update user credentials", "error", err)
+			respondWithInternalError(res)
+			return
+		}
+
+		respondWithJSON(res, http.StatusOK, user)
+	})
+}
