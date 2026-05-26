@@ -126,3 +126,53 @@ func (ac *apiConfig) loginHandler() http.Handler {
 		respondWithJSON(res, http.StatusOK, cleanedUser)
 	})
 }
+
+func (ac *apiConfig) refreshHandler() http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		refreshToken, err := auth.GetBearerToken(req.Header)
+		if err != nil {
+			slog.Error("failed to get bearer token", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		dbToken, err := ac.databaseQueries.GetRefreshToken(req.Context(), refreshToken)
+		if err != nil {
+			slog.Error("failed to get refresh token", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		// Make sure token is valid
+		currentTime := time.Now()
+
+		if dbToken.ExpiresAt.Before(currentTime) {
+			slog.Error("refresh token expired", "expires_at", dbToken.ExpiresAt, "current_time", currentTime)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		if !dbToken.RevokedAt.Valid {
+			slog.Error("refresh token revoked", "revoked_at", dbToken.RevokedAt)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		// Generate new token
+		jwt, err := auth.MakeJWT(dbToken.UserID, ac.jwtSecret, time.Hour)
+		if err != nil {
+			slog.Error("failed to generate jwt", "error", err)
+			respondWithError(res, http.StatusInternalServerError, "Internal Server Error")
+			return
+		}
+
+		accessToken := struct {
+			Token string `json:"token"`
+		}{
+			Token: jwt,
+		}
+
+		respondWithJSON(res, http.StatusOK, accessToken)
+
+	})
+}
