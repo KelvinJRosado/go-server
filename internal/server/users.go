@@ -152,7 +152,7 @@ func (ac *apiConfig) refreshHandler() http.Handler {
 			return
 		}
 
-		if !dbToken.RevokedAt.Valid {
+		if dbToken.RevokedAt.Valid && dbToken.RevokedAt.Time.Before(currentTime) {
 			slog.Error("refresh token revoked", "revoked_at", dbToken.RevokedAt)
 			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
 			return
