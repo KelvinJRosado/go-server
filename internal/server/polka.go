@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/KelvinJRosado/go-server/internal/auth"
 	"github.com/google/uuid"
 )
 
@@ -21,6 +22,20 @@ func (ac *apiConfig) upgradeUserToRedHandler() http.Handler {
 		params, ok := getInputStruct[input](res, req)
 		if !ok {
 			// Util handles writing error response, so we can just return
+			return
+		}
+
+		// Validate incoming API Key
+		apiKey, err := auth.GetAPIKey(req.Header)
+		if err != nil {
+			slog.Error("failed to get API key", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		if ac.polkaKey != apiKey {
+			slog.Error("invalid API key", "apiKey", apiKey, "polkaKey", ac.polkaKey)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 

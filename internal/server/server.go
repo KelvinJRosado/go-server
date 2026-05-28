@@ -36,6 +36,7 @@ func Run() {
 		databaseQueries: dbQueries,
 		platform:        os.Getenv("PLATFORM"),
 		jwtSecret:       jwtSecret,
+		polkaKey:        os.Getenv("POLKA_KEY"),
 	}
 
 	// Create server
