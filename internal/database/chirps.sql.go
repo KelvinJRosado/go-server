@@ -42,10 +42,16 @@ const deleteChirpById = `-- name: DeleteChirpById :exec
 DELETE FROM chirps
 WHERE
   id = $1
+  and user_id = $2
 `
 
-func (q *Queries) DeleteChirpById(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteChirpById, id)
+type DeleteChirpByIdParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) DeleteChirpById(ctx context.Context, arg DeleteChirpByIdParams) error {
+	_, err := q.db.ExecContext(ctx, deleteChirpById, arg.ID, arg.UserID)
 	return err
 }
 

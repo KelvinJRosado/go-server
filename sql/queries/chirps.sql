@@ -33,4 +33,5 @@ WHERE
 -- name: DeleteChirpById :exec
 DELETE FROM chirps
 WHERE
-  id = $1;
+  id = $1
+  and user_id = $2;
