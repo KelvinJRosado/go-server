@@ -34,7 +34,7 @@ func (ac *apiConfig) upgradeUserToRedHandler() http.Handler {
 		}
 
 		if ac.polkaKey != apiKey {
-			slog.Error("invalid API key", "apiKey", apiKey, "polkaKey", ac.polkaKey)
+			slog.Error("invalid API key")
 			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
