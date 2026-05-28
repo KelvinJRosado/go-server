@@ -113,6 +113,7 @@ func (ac *apiConfig) loginHandler() http.Handler {
 			Email        string    `json:"email"`
 			Token        string    `json:"token"`
 			RefreshToken string    `json:"refresh_token"`
+			IsChirpyRed  bool      `json:"is_chirpy_red"`
 		}{
 			ID:           user.ID,
 			CreatedAt:    user.CreatedAt,
@@ -120,6 +121,7 @@ func (ac *apiConfig) loginHandler() http.Handler {
 			Email:        user.Email,
 			Token:        jwt,
 			RefreshToken: refreshToken,
+			IsChirpyRed:  user.IsChirpyRed,
 		}
 
 		// Password matches, return cleaned user

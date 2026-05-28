@@ -64,6 +64,8 @@ func Run() {
 	serverHandler.Handle("DELETE /api/chirps/{id}", apiCfg.deleteChirpByIdHandler())
 	serverHandler.Handle("POST /api/chirps", apiCfg.createChirpHandler())
 
+	serverHandler.Handle("POST /api/polka/webhooks", apiCfg.upgradeUserToRedHandler())
+
 	// Start server and log any failures
 	slog.Info("Starting server", "address", "http://localhost"+string(srvr.Addr)+"/app")
 	err = srvr.ListenAndServe()
