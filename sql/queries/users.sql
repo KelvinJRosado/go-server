@@ -40,6 +40,16 @@ RETURNING
 -- name: DeleteAllUsers :exec
 DELETE FROM users;
 
+-- name: GetUserById :one
+SELECT
+  id,
+  created_at,
+  updated_at
+FROM
+  users
+WHERE
+  id = $1;
+
 -- name: UpgradeUserToRed :exec
 UPDATE users
 SET
