@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"regexp"
+	"sort"
 	"unicode/utf8"
 
 	"github.com/KelvinJRosado/go-server/internal/auth"
@@ -102,6 +103,16 @@ func (ac *apiConfig) getChirpsHandler() http.Handler {
 			slog.Error("Could not get chirps", "error", err)
 			respondWithInternalError(res)
 			return
+		}
+
+		// Get optional query param, sort_order
+		sortOrder := req.URL.Query().Get("sort")
+		sortAsc := sortOrder != "desc"
+		// Sort chirps by created_at if sort_order is not explicitly"desc"
+		if !sortAsc {
+			sort.Slice(ch, func(i, j int) bool {
+				return ch[i].CreatedAt.After(ch[j].CreatedAt)
+			})
 		}
 
 		respondWithJSON(res, http.StatusOK, ch)
