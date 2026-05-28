@@ -80,8 +80,24 @@ func (ac *apiConfig) createChirpHandler() http.Handler {
 func (ac *apiConfig) getChirpsHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 
+		// Get optional query param, author_id
+		authorId := req.URL.Query().Get("author_id")
+		var userId uuid.NullUUID
+
+		if authorId == "" {
+			userId = uuid.NullUUID{Valid: false}
+		} else {
+			parsedId, err := uuid.Parse(authorId)
+			if err != nil {
+				slog.Error("Invalid author ID", "error", err)
+				respondWithError(res, http.StatusBadRequest, "Invalid author ID")
+				return
+			}
+			userId = uuid.NullUUID{UUID: parsedId, Valid: true}
+		}
+
 		// Get chirps from DB
-		ch, err := ac.databaseQueries.GetAllChirps(req.Context())
+		ch, err := ac.databaseQueries.GetAllChirps(req.Context(), userId)
 		if err != nil {
 			slog.Error("Could not get chirps", "error", err)
 			respondWithInternalError(res)
