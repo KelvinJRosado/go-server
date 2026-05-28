@@ -61,6 +61,7 @@ func Run() {
 
 	serverHandler.Handle("GET /api/chirps", apiCfg.getChirpsHandler())
 	serverHandler.Handle("GET /api/chirps/{id}", apiCfg.getChirpByIdHandler())
+	serverHandler.Handle("DELETE /api/chirps/{id}", apiCfg.deleteChirpByIdHandler())
 	serverHandler.Handle("POST /api/chirps", apiCfg.createChirpHandler())
 
 	// Start server and log any failures

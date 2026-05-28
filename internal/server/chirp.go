@@ -106,11 +106,67 @@ func (ac *apiConfig) getChirpByIdHandler() http.Handler {
 		// Get chirp by ID
 		ch, err := ac.databaseQueries.GetChirpById(req.Context(), chirpId)
 		if err != nil {
-			slog.Error("Could not get chirps", "error", err)
+			slog.Error("Could not get chirp", "error", err)
 			respondWithError(res, http.StatusNotFound, "Chirp with given ID not found")
 			return
 		}
 
 		respondWithJSON(res, http.StatusOK, ch)
+	})
+}
+
+func (ac *apiConfig) deleteChirpByIdHandler() http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		// Get ID from path
+		chirpId, err := uuid.Parse(req.PathValue("id"))
+		if err != nil {
+			slog.Error("Invalid chirp ID", "error", err)
+			respondWithError(res, http.StatusBadRequest, "Invalid chirp ID")
+			return
+		}
+
+		// Validate token
+		userToken, err := auth.GetBearerToken(req.Header)
+		if err != nil {
+			slog.Error("failed to get bearer token", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+		userId, err := auth.ValidateJWT(userToken, ac.jwtSecret)
+		if err != nil {
+			slog.Error("failed to validate jwt", "error", err)
+			respondWithError(res, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		// Get chirp by ID
+		ch, err := ac.databaseQueries.GetChirpById(req.Context(), chirpId)
+		if err != nil {
+			slog.Error("Could not get chirp", "error", err)
+			respondWithError(res, http.StatusNotFound, "Chirp with given ID not found")
+			return
+		}
+
+		// Check ownership
+		if ch.UserID != userId {
+			slog.Error("Can only delete chirp by owner", "user_id", ch.UserID, "token_user_id", userId)
+			respondWithError(res, http.StatusForbidden, "Can only delete chirp by owner")
+			return
+		}
+
+		// Delete chirp by IDs
+		dbArgs := database.DeleteChirpByIdParams{
+			ID:     chirpId,
+			UserID: userId,
+		}
+		err = ac.databaseQueries.DeleteChirpById(req.Context(), dbArgs)
+		if err != nil {
+			slog.Error("Could not delete chirp", "error", err)
+			respondWithError(res, http.StatusNotFound, "Chirp with given ID not found")
+			return
+		}
+
+		respondWithJSON(res, http.StatusNoContent, nil)
 	})
 }
