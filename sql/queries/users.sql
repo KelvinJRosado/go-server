@@ -13,7 +13,8 @@ RETURNING
   id,
   created_at,
   updated_at,
-  email;
+  email,
+  is_chirpy_red;
 
 -- name: GetUserByEmail :one
 SELECT
@@ -35,7 +36,8 @@ RETURNING
   id,
   created_at,
   updated_at,
-  email;
+  email,
+  is_chirpy_red;
 
 -- name: DeleteAllUsers :exec
 DELETE FROM users;
@@ -44,7 +46,8 @@ DELETE FROM users;
 SELECT
   id,
   created_at,
-  updated_at
+  updated_at,
+  is_chirpy_red
 FROM
   users
 WHERE

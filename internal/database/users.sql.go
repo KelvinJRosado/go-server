@@ -27,7 +27,8 @@ RETURNING
   id,
   created_at,
   updated_at,
-  email
+  email,
+  is_chirpy_red
 `
 
 type CreateUserParams struct {
@@ -36,10 +37,11 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Email       string    `json:"email"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -50,6 +52,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
@@ -90,7 +93,8 @@ const getUserById = `-- name: GetUserById :one
 SELECT
   id,
   created_at,
-  updated_at
+  updated_at,
+  is_chirpy_red
 FROM
   users
 WHERE
@@ -98,15 +102,21 @@ WHERE
 `
 
 type GetUserByIdRow struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserById, id)
 	var i GetUserByIdRow
-	err := row.Scan(&i.ID, &i.CreatedAt, &i.UpdatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.IsChirpyRed,
+	)
 	return i, err
 }
 
@@ -122,7 +132,8 @@ RETURNING
   id,
   created_at,
   updated_at,
-  email
+  email,
+  is_chirpy_red
 `
 
 type UpdateUserCredentialsParams struct {
@@ -132,10 +143,11 @@ type UpdateUserCredentialsParams struct {
 }
 
 type UpdateUserCredentialsRow struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Email       string    `json:"email"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 func (q *Queries) UpdateUserCredentials(ctx context.Context, arg UpdateUserCredentialsParams) (UpdateUserCredentialsRow, error) {
@@ -146,6 +158,7 @@ func (q *Queries) UpdateUserCredentials(ctx context.Context, arg UpdateUserCrede
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
